@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>FALLING ANGELS</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,100;0,200;0,400;0,700;1,100;1,400;1,700&family=Josefin+Sans:ital,wght@0,400&family=Asul:ital,wght@0,400&display=swap">
+
+  <style>
+    :root{
+      --gap: 1.4px;
+      --text-pad: 14px;
+      --text: #e6e6e6;
+      --text-muted: #bdbdbd;
+      --bg: #000;
+
+      --font-size: 12px;        /* desktop */
+      --font-size-mobile: 15px; /* mobile */
+      --line-height: 1.5;
+
+      /* MENU vars (copied from provided menu) */
+      --nav: #726eff;
+      --nav-active: #fff;
+      --hdr-pad-top: 27.5px;
+      --hdr-pad-x: 24px;
+      --nav-size: 8.8px;
+      --nav-track: 1.11px;
+      --nav-gap: 13px;
+      --max: 1200px;
+    }
+
+    *{ box-sizing:border-box; }
+
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Raleway, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    }
+
+    /* --- MENU (only) --- */
+    .site-header{
+      position:fixed;
+      inset:0 0 auto 0;
+      z-index:9999;
+      padding: var(--hdr-pad-top) calc(var(--hdr-pad-x) + env(safe-area-inset-right,0px)) 12px calc(var(--hdr-pad-x) + env(safe-area-inset-left,0px));
+      background:transparent;
+      pointer-events:auto;
+    }
+    .hdr-container{ max-width:var(--max); margin:0 auto; }
+    .site-header__row{ display:flex; justify-content:flex-end; align-items:flex-start; }
+    .nav{ display:flex; align-items:center; gap:var(--nav-gap); }
+    .nav a{
+      font-family:"Futura PT","futura-pt","Futura","Avenir Next","Avenir",system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
+      font-weight:400;
+      font-size:var(--nav-size);
+      letter-spacing:var(--nav-track);
+      text-transform:uppercase;
+      line-height:1.6;
+      color:var(--nav);
+      text-decoration:none;
+      white-space:nowrap;
+      transition:color .18s ease;
+    }
+    .nav a:hover,.nav a.is-active{ color:var(--nav-active); }
+
+    .nav-toggle{
+      display:none;
+      font-family:"Futura PT","futura-pt","Futura","Avenir Next","Avenir",system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
+      font-size:var(--nav-size);
+      letter-spacing:var(--nav-track);
+      text-transform:uppercase;
+      color:var(--nav-active);
+      border:1px solid rgba(255,255,255,.18);
+      background:rgba(0,0,0,.25);
+      padding:8px 10px;
+      border-radius:999px;
+      cursor:pointer;
+      -webkit-tap-highlight-color:transparent;
+      user-select:none;
+    }
+    .nav-state{ position:fixed; left:-9999px; top:-9999px; opacity:0; pointer-events:none; }
+    .nav-backdrop{
+      position:fixed; inset:0; background:rgba(0,0,0,.55);
+      opacity:0; pointer-events:none; transition:opacity .18s ease; z-index:9998;
+    }
+    .nav-panel{
+      position:fixed; top:0; right:0; height:100vh; width:min(320px,86vw);
+      padding:72px 22px 22px; background:rgba(0,0,0,.92); backdrop-filter:blur(10px);
+      transform:translateX(110%); transition:transform .22s ease; z-index:10000;
+      border-left:1px solid rgba(255,255,255,.08);
+    }
+    .nav-panel a{
+      display:block; padding:14px 0; border-bottom:1px solid rgba(255,255,255,.08);
+      font-family:"Futura PT","futura-pt","Futura","Avenir Next","Avenir",system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
+      font-size:12px; letter-spacing:var(--nav-track); text-transform:uppercase;
+      color:var(--nav); text-decoration:none;
+    }
+    .nav-panel a.is-active{ color:var(--nav-active); }
+    .nav-panel__close{
+      position:fixed; top:18px; right:18px; z-index:10001;
+      border:1px solid rgba(255,255,255,.18); background:rgba(0,0,0,.25); color:#fff;
+      padding:8px 10px; border-radius:999px; cursor:pointer;
+      font-family:"Futura PT","futura-pt","Futura","Avenir Next","Avenir",system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
+      font-size:var(--nav-size); letter-spacing:var(--nav-track); text-transform:uppercase;
+      user-select:none;
+    }
+    .nav-state:checked ~ .nav-backdrop{ opacity:1; pointer-events:auto; }
+    .nav-state:checked ~ .nav-panel{ transform:translateX(0); }
+
+    @media (max-width:860px){
+      :root{ --hdr-pad-x:20px; --hdr-pad-top:22px; }
+      .nav{ display:none; }
+      .nav-toggle{ display:flex; align-items:center; }
+    }
+
+    /* --- PAGE LAYOUT --- */
+    .page {
+      min-height: 100vh;
+      width: 100vw;
+      box-sizing: border-box;
+      padding: var(--gap);
+      background: var(--bg);
+    }
+
+    .grid {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--gap);
+      align-items: stretch;
+      min-height: calc(100vh - (2 * var(--gap)));
+    }
+
+    .col {
+      display: grid;
+      gap: var(--gap);
+      min-width: 0;
+      min-height: 100%;
+      align-content: start;
+    }
+
+    /* Pinned-bottom structure retained */
+    .col-left { grid-template-rows: auto auto auto auto 1fr auto; }
+    .col-right { grid-template-rows: auto auto auto 1fr auto; }
+
+    .row-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--gap);
+      min-width: 0;
+    }
+
+    img {
+      width: 100%;
+      height: auto;
+      display: block;
+      background: #000;
+    }
+
+    .text {
+      padding: var(--text-pad);
+      line-height: var(--line-height);
+      font-size: var(--font-size);
+      box-sizing: border-box;
+      background: var(--bg);
+      color: var(--text);
+    }
+    .center { text-align: center; }
+    .muted { color: var(--text-muted); }
+    em { font-style: italic; }
+    strong { font-weight: 700; }
+
+    .footer {
+      position: fixed;
+      left: calc(var(--gap) + env(safe-area-inset-left, 0px));
+      bottom: calc(var(--gap) + env(safe-area-inset-bottom, 0px));
+      z-index: 9000;
+      pointer-events: none;
+    }
+    .footer .text{ padding: 0; background: transparent; }
+
+    @media (max-width: 900px) {
+      .grid { grid-template-columns: 1fr; min-height: 0; }
+      .col-left, .col-right { grid-template-rows: none; }
+      .text { font-size: var(--font-size-mobile); }
+    }
+  
+    /* FALLING ANGELS helpers */
+    .span-2 { grid-column: 1 / -1; }
+    .center { text-align: center; }
+    .row-3{
+      display:grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: var(--gap);
+      min-width: 0;
+    }
+    .row-3 img{ width:100%; height:auto; display:block; }
+    @media (max-width: 900px){
+      .row-3{ grid-template-columns: 1fr; }
+      .span-2{ grid-column: auto; }
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <!-- MENU (only) -->
+  <header aria-label="Site header" class="site-header" role="banner">
+    <div class="hdr-container">
+      <div class="site-header__row">
+        <nav aria-label="Primary navigation" class="nav">
+          <a data-key="whatdoido" href="https://xd.enricopoli.com/ephome.html">WHAT DO I ACTUALLY DO</a>
+          <a data-key="xd" href="https://xd.enricopoli.com/">XD</a>
+          <a data-key="films" href="https://films.enricopoli.com/">FILMS</a>
+          <a data-key="dreamlog" href="http://_dream-log.enricopoli.com/">_ DREAM LOG</a>
+          <a data-key="journal" href="https://journal.enricopoli.com/">JOURNAL</a>
+          <a data-key="about" href="https://about.enricopoli.com/">ABOUT</a>
+        </nav>
+        <label aria-expanded="false" aria-label="Open menu" class="nav-toggle" for="navState" id="navToggle" role="button">MENU</label>
+      </div>
+    </div>
+  </header>
+
+  <!-- PAGE -->
+  <main class="page">
+    <section class="grid falling" aria-label="FALLING ANGELS content">
+
+      <!-- Row 1: 2-up -->
+      <img class="item" src="assets/01.webp" alt="">
+      <img class="item" src="assets/02.webp" alt="">
+
+      <!-- Title -->
+      <div class="text muted span-2">dream log # 001 ___ FALLING ANGELS</div>
+
+      <!-- Full-width -->
+      <img class="item span-2" src="assets/04.webp" alt="">
+
+      <!-- Quote -->
+      <div class="text span-2">
+        <p style="white-space:pre-wrap;">“Weary with toil, I haste me to my bed, The dear respose for limbs with travel tir’d; But then begins a journey in my head To work my mind, when body’s work’s expired: For then my thoughts—from far where I abide— Intend a zealous pilgrimage to thee, And keep my drooping eyelids open wide, Looking on darkness which the blind do see: Save that my soul’s imaginary sight Presents thy shadow to my sightless view, Which, like a jewel (hung in ghastly night, Makes black night beauteous, and her old face new. Lo! thus, by day my limbs, by night my mind, For thee, and for myself, no quiet find.”<br><br><strong><em>― Sir W. S.</em></strong></p>
+      </div>
+
+      <!-- Row: 2-up -->
+      <img class="item" src="assets/03.webp" alt="">
+      <img class="item" src="assets/07.webp" alt="">
+
+      <!-- Row: 3-up -->
+      <div class="row-3 span-2" aria-label="Three-up images">
+        <img class="item" src="assets/08.webp" alt="">
+        <img class="item" src="assets/10.webp" alt="">
+        <img class="item" src="assets/11.webp" alt="">
+      </div>
+
+      <!-- Centered line -->
+      <div class="text muted span-2 center"><em>woven in silence __ unstitched from the sky __ fear folding into wonder</em></div>
+
+      <!-- Full-width ending -->
+      <img class="item span-2" src="assets/12.webp" alt="">
+
+    </section>
+  </main>
+<div class="footer" aria-label="Footer">
+    <div class="text muted"><em>ChatGPT + Photoshop</em></div>
+  </div>
+
+  <!-- MENU mobile panel -->
+  <input aria-hidden="true" class="nav-state" id="navState" type="checkbox"/>
+  <label aria-hidden="true" class="nav-backdrop" for="navState"></label>
+  <aside aria-hidden="true" class="nav-panel" id="navPanel">
+    <label class="nav-panel__close" for="navState" id="navClose" role="button">CLOSE</label>
+    <a data-key="whatdoido" href="https://xd.enricopoli.com/ephome.html">WHAT DO I ACTUALLY DO</a>
+    <a data-key="xd" href="https://xd.enricopoli.com/">XD</a>
+    <a data-key="films" href="https://films.enricopoli.com/">FILMS</a>
+    <a data-key="dreamlog" href="http://_dream-log.enricopoli.com/">_ DREAM LOG</a>
+    <a data-key="journal" href="https://journal.enricopoli.com/">JOURNAL</a>
+    <a data-key="about" href="https://about.enricopoli.com/">ABOUT</a>
+  </aside>
+
+  <script>
+    (function(){
+      // set active menu item: _ DREAM LOG
+      document.querySelectorAll('[data-key="dreamlog"]').forEach(a => a.classList.add('is-active'));
+
+      // keep aria in sync for mobile panel
+      const t = document.getElementById('navToggle');
+      const p = document.getElementById('navPanel');
+      const s = document.getElementById('navState');
+
+      function sync(){
+        const open = !!(s && s.checked);
+        if (p) p.setAttribute('aria-hidden', open ? 'false' : 'true');
+        if (t) t.setAttribute('aria-expanded', open ? 'true' : 'false');
+      }
+      if (s) s.addEventListener('change', sync);
+      sync();
+    })();
+  </script>
+
+</body>
+</html>
